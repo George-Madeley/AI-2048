@@ -4,7 +4,8 @@ This script holds the functionality for the program to take a screenshot, read d
 
 import math
 import pyautogui
-import PIL
+from PIL import Image
+from pynput.keyboard import Key, Controller
 
 
 def DivideImage(image: Image, config: dict) -> list:
@@ -120,3 +121,32 @@ def GetScreenshot() -> str:
 
     pyautogui.screenshot('images\shot.png')
     return 'images\shot.png'
+
+def PressKey(keyNum: int) -> None:
+    """
+    Enters up, down, left, or right on to the game.
+
+    Args:
+        keyNum: integer representing the key to be pressed.
+            0 - Up,
+            1 - Right,
+            2 - Down,
+            3 - Left
+    """
+
+    keyboard = Controller()
+    if keyNum == 0:
+        keyboard.press(Key.up)
+        keyboard.release(Key.up)
+    elif keyNum == 1:
+        keyboard.press(Key.right)
+        keyboard.release(Key.right)
+    elif keyNum == 2:
+        keyboard.press(Key.down)
+        keyboard.release(Key.down)
+    elif keyNum == 3:
+        keyboard.press(Key.left)
+        keyboard.release(Key.left)
+    else:
+        raise ValueError
+        

@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 selenium = "*"
 pyautogui = "*"
+pillow = "*"
+pynput = "*"
 
 [dev-packages]
 
