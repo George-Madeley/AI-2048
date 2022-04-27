@@ -108,7 +108,7 @@ def GetInformation(config: dict, colorConfig: dict):
         # wordleImage.show()
 
         dividedImage = DivideImage(image, config)
-        tileNumberList = [[GetTileNumber(sampleImage) for sampleImage in dividedImage[row]] for row in range(len(dividedImage))]
+        tileNumberList = [[GetTileNumber(sampleImage, colorConfig) for sampleImage in dividedImage[row]] for row in range(len(dividedImage))]
         return tileNumberList
     
 def GetScreenshot() -> str:
