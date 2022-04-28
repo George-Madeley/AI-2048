@@ -2,10 +2,15 @@
 This script holds the functionality for the program to take a screenshot, read data from the screen shot and enter in controls.
 """
 
+from asyncio.log import logger
+import logging
 import math
 import pyautogui
 from PIL import Image
-from pynput.keyboard import Key, Controller
+from pynput.keyboard import Key, Controller as KeyController
+from pynput.mouse import Button, Controller as MouseController
+
+from streamio import AppendColorFile
 
 
 def DivideImage(image: Image, config: dict) -> list:
@@ -38,23 +43,33 @@ def DivideImage(image: Image, config: dict) -> list:
         dividedImage.append(dividedRow)
     return dividedImage
 
-def GetTileNumber(image: Image, colorConfig: dict) -> int:
+def GetTileNumber(image: Image, colorConfig: dict, margin: int, filepath: str) -> int:
     """
     Gets the background color of the image.
 
     Args:
         image: The image to find the color in.
+        colorConfig: The color configuration dict.
+        margin: The color value margin or error.
+        filepath: The filepath to the color csv file.
 
     Returns:
         The number in the tile.
     """
     color = GetColorValue(image)
     for number, colorCode in colorConfig.items():
-        if (colorCode["r"] == color["r"] and
-            colorCode["g"] == color["g"] and
-            colorCode["b"] == color["b"]):
+        if (colorCode["r"] - margin <= color["r"] <= colorCode["r"] + margin and
+            colorCode["g"] - margin <= color["g"] <= colorCode["g"] + margin and
+            colorCode["b"] - margin <= color["b"] <= colorCode["b"] + margin):
             return number
-    return None
+    number = int(input("What number does this color relate to?:\t"))
+    AppendColorFile(filepath, {
+        "number": number,
+        "r": color["r"],
+        "g": color["g"],
+        "b": color["b"]
+    })
+    return number
 
 def GetColorValue(image: Image) -> dict:
     """
@@ -79,9 +94,9 @@ def GetColorValue(image: Image) -> dict:
     finalColor[1] /= len(colors)
     finalColor[2] /= len(colors)
     return {
-        "r": finalColor[0],
-        "g": finalColor[1],
-        "b": finalColor[2]
+        "r": math.floor(finalColor[0]),
+        "g": math.floor(finalColor[1]),
+        "b": math.floor(finalColor[2])
     }
 
 def GetInformation(config: dict, colorConfig: dict):
@@ -111,7 +126,18 @@ def GetInformation(config: dict, colorConfig: dict):
         # Divide up image
         dividedImage = DivideImage(image, config)
         # Get list of numbers
-        tileNumberList = [[GetTileNumber(sampleImage, colorConfig) for sampleImage in dividedImage[row]] for row in range(len(dividedImage))]
+        gridsize = config['2048']['gridsize']
+        tileNumberList = [[0 for i in range(gridsize)] for j in range(gridsize)]
+        for j in range(gridsize):
+            for i in range(gridsize):
+                logging.debug(f'j:{j + 1}, i:{i + 1}')
+                sampleImage = dividedImage[j][i]
+                tileNumberList[j][i] = GetTileNumber(
+                    sampleImage,
+                    colorConfig,
+                    config['colormargin'],
+                    config['colors']
+                )
     return tileNumberList
     
 def GetScreenshot() -> str:
@@ -122,8 +148,8 @@ def GetScreenshot() -> str:
         The string of the screenshot filepath.
     """
 
-    pyautogui.screenshot('images\shot.png')
-    return 'images\shot.png'
+    pyautogui.screenshot('img\shot.png')
+    return 'img\shot.png'
 
 def PressKey(keyNum: int) -> None:
     """
@@ -137,19 +163,36 @@ def PressKey(keyNum: int) -> None:
             3 - Left
     """
 
-    keyboard = Controller()
+    keyboard = KeyController()
     if keyNum == 0:
+        logging.info('== Pressed: UP ==')
         keyboard.press(Key.up)
         keyboard.release(Key.up)
     elif keyNum == 1:
+        logging.info('== Pressed: RIGHT ==')
         keyboard.press(Key.right)
         keyboard.release(Key.right)
     elif keyNum == 2:
+        logging.info('== Pressed: DOWN ==')
         keyboard.press(Key.down)
         keyboard.release(Key.down)
     elif keyNum == 3:
+        logging.info('== Pressed: LEFT ==')
         keyboard.press(Key.left)
         keyboard.release(Key.left)
     else:
         raise ValueError
         
+def ClickMouse(x: int, y: int) -> None:
+    """
+    Clicks the mouse at a given location.
+    
+    Args:
+        x: The x-coordinate of the mouse.
+        y: The y-coordinate of the mouse.
+    """
+
+    mouse = MouseController()
+    mouse.position = (x, y)
+    mouse.press(Button.left)
+    mouse.release(Button.left)

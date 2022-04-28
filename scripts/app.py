@@ -1,10 +1,11 @@
 import sys
 import time
+import logging
 
 
 from streamio import ReadConfigFile, ReadColorFile, RecordData
 from agent import Agent
-from interface import GetInformation, PressKey
+from interface import GetInformation, PressKey, ClickMouse
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -40,10 +41,21 @@ def PlayGame(config: dict, colorDict: dict) -> None:
     agent = Agent()
     gameOver = False
     turnNumber = 0
+
+    # Use mouse to remove popup window
+    time.sleep(1)
+    mouseX = config["button1"]["x"]
+    mouseY = config["button1"]["y"]
+    ClickMouse(mouseX, mouseY)
+
     while not gameOver:
+        # Sleep
+        time.sleep(config['turndelay'])
         # Read data from screen
         tileNumberList = GetInformation(config, colorDict)
         # Check if game over.
+        time.sleep(config['turndelay'])
+        
         if gameOver:
             break
         # Pass data to agent and get responce from agent
@@ -51,8 +63,6 @@ def PlayGame(config: dict, colorDict: dict) -> None:
         # Enter response
         PressKey(nextMove)
         turnNumber += 1
-        # Sleep
-        time.sleep(config['turndelay'])
     RecordData({
         "score": CalculateScore(tileNumberList),
         "highest value": GetHighestTile(tileNumberList),
@@ -109,6 +119,9 @@ def GetSystemArgs() -> str:
         raise ValueError("Incorrect number of input arguments.")
     else:
         return sys.argv[1]
+
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.debug('== Start of Program ==')
 
 if __name__ == "__main__":
     main()

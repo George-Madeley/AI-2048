@@ -55,9 +55,17 @@ def ReadColorFile(filepath: str) -> dict:
         A dict of the data in the color file.
     """
 
-    colorDict = None
+    colorDict = {}
     with open(filepath) as colorCSV:
-        colorDict = csv.DictReader(colorCSV)
+        colorDictReader = csv.DictReader(colorCSV, ['number','r','g','b'])
+        for row in colorDictReader:
+            number = row['number']
+            if number == 'number': continue
+            colorDict[number] = {
+                'r': int(row['r']),
+                'g': int(row['g']),
+                'b': int(row['b'])
+            }
     return colorDict
 
 def AppendColorFile(filepath: str, color: dict) -> None:
@@ -69,6 +77,6 @@ def AppendColorFile(filepath: str, color: dict) -> None:
         color: The color to appened.
     """
 
-    with open(filepath, 'a') as colorCSV:
+    with open(filepath, 'a', newline='') as colorCSV:
         colorDictWriter = csv.DictWriter(colorCSV, ['number','r','g','b'])
         colorDictWriter.writerow(color)
