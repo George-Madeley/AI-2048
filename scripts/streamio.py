@@ -5,7 +5,7 @@ This script holds the functionality to record data to the record files.
 import csv
 import json
 
-def RecordToCSV(data: dict, filepath: str) -> bool:
+def RecordData(data: dict, filepath: str) -> bool:
     """
     Records data to a CSV file.
     
@@ -17,7 +17,7 @@ def RecordToCSV(data: dict, filepath: str) -> bool:
         True if the data was successfully stored to the CSV.
     """
 
-    headers = ['id', 'test no.', 'score', 'highest value']
+    headers = ['test no.', 'score', 'highest value', 'total moves']
     try:
         with open(filepath, 'w') as output:
             outputDictWriter = csv.DictWriter(output, headers)

@@ -96,20 +96,23 @@ def GetInformation(config: dict, colorConfig: dict):
         A 2D-list of a integer representation of the current game state.
     """
 
+    # Get Screenshot
     filePath = GetScreenshot()
+    # Load screenshot
     with Image.open(filePath) as screenshot:
-        # left, upper, right, lower bounds
+        # Calculate game bounds
         upperX = config["2048"]["pos"]["x"]
         upperY = config["2048"]["pos"]["y"]
         lowerX = upperX + config["2048"]["size"]["x"]
         lowerY = upperY + config["2048"]["size"]["y"]
         cropBoxSize = (upperX, upperY, lowerX, lowerY)
         image = screenshot.crop(box=cropBoxSize)
-        # wordleImage.show()
-
+        # image.show()
+        # Divide up image
         dividedImage = DivideImage(image, config)
+        # Get list of numbers
         tileNumberList = [[GetTileNumber(sampleImage, colorConfig) for sampleImage in dividedImage[row]] for row in range(len(dividedImage))]
-        return tileNumberList
+    return tileNumberList
     
 def GetScreenshot() -> str:
     """

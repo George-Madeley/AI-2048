@@ -8,6 +8,8 @@ selenium = "*"
 pyautogui = "*"
 pillow = "*"
 pynput = "*"
+numpy = "*"
+webdriver-manager = "*"
 
 [dev-packages]
 
