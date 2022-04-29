@@ -1,3 +1,14 @@
+"""
+Author: George Madeley,
+Date: 29/04/2022
+
+Description:
+    - Root file connecting all other scripts together.
+    - Manages the agent.
+    - Plays the game.
+    - Calculates scores.
+"""
+
 import sys
 import time
 import logging

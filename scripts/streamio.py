@@ -1,66 +1,65 @@
 """
-This script holds the functionality to record data to the record files.
+Author: George Madeley,
+Date: 29/04/2022
+
+Description:
+    - Reads data from the color.csv file and appsettings.json file.
+    - Converts the read data into the correct format for the rest of the program.
+    - Writes the test results to the correct files.
 """
 
 import csv
 import json
 import numpy as np
 
-def RecordData(data: dict, filepath: str) -> bool:
+def AppendColorFile(filepath: str, color: dict) -> None:
     """
-    Records data to a CSV file.
-    
-    Args:
-        data: (dict) The data to be stored in the csv.
-        filepath: (str) The file path to the csv file.
-        
-    Returns:
-        True if the data was successfully stored to the CSV.
-    """
-
-    headers = ['test no.', 'score', 'highest value', 'total moves']
-    try:
-        with open(filepath, 'w') as output:
-            outputDictWriter = csv.DictWriter(output, headers)
-            outputDictWriter.writeheader()
-            outputDictWriter.writerow(data)
-        return True
-    except ValueError:
-        print("CSV File error occured.")
-        return False
-
-def ReadConfigFile(filepath: str) -> dict:
-    """
-    Reads the data from the provided config file.
-    
-    Args:
-        filepath: The filepath to the config file.
-        
-    Returns:
-        A dict of the data in the config file.
-    """
-
-    configDict = None
-    with open(filepath) as configFile:
-        configDict =  json.load(configFile)
-    return configDict
-
-def ReadColorFile(filepath: str) -> list:
-    """
-    Reads the data from the provided color file.
+    Appends a new color to the provided color file.
     
     Args:
         filepath: The filepath to the color config file.
-        
-    Returns:
-        A list of the data in the color file.
+        color: The color to appened.
     """
 
-    with open(filepath) as colorCSV:
-        colorDictReader = csv.DictReader(colorCSV, ['number','r','g','b'])
-        colorList = EliminateDuplicates(colorDictReader)
-        colorArray = ConvertToArray(colorList)
-    return colorArray
+    with open(filepath, 'a', newline='') as colorCSV:
+        colorDictWriter = csv.DictWriter(colorCSV, ['number','r','g','b'])
+        colorDictWriter.writerow(color)
+
+def CalculateCentroids(colorDict: dict) -> dict:
+    """
+    Calculates the centroid of each color.
+    
+    Args:
+        The color dict from the read color file.
+        
+    Returns:
+        A dict of all the color centroids.
+    """
+
+    totalDict = {}
+    for row in colorDict:
+        number = row['number']
+        if number == 'number': continue
+        if number not in totalDict.keys():
+            totalDict[number] = {
+                'r': int(row['r']),
+                'g': int(row['g']),
+                'b': int(row['b']),
+                'count': 1
+            }
+        else:
+            totalDict[number]['r'] += int(row['r'])
+            totalDict[number]['g'] += int(row['g'])
+            totalDict[number]['b'] += int(row['b'])
+            totalDict[number]['count'] += 1
+    centroidDict = {}
+    for number, field in totalDict.items():
+        centroidDict[number] = {
+            'r': field['r'] / field['count'],
+            'g': field['g'] / field['count'],
+            'b': field['b'] / field['count']
+        }
+    return centroidDict
 
 def ConvertToArray(oldList: list) -> list:
     """
@@ -104,52 +103,68 @@ def EliminateDuplicates(oldList: list) -> list:
         })
     return newList
 
-
-def CalculateCentroids(colorDict: dict) -> dict:
+def ReadColorFile(filepath: str) -> list:
     """
-    Calculates the centroid of each color.
-    
-    Args:
-        The color dict from the read color file.
-        
-    Returns:
-        A dict of all the color centroids.
-    """
-
-    totalDict = {}
-    for row in colorDict:
-        number = row['number']
-        if number == 'number': continue
-        if number not in totalDict.keys():
-            totalDict[number] = {
-                'r': int(row['r']),
-                'g': int(row['g']),
-                'b': int(row['b']),
-                'count': 1
-            }
-        else:
-            totalDict[number]['r'] += int(row['r'])
-            totalDict[number]['g'] += int(row['g'])
-            totalDict[number]['b'] += int(row['b'])
-            totalDict[number]['count'] += 1
-    centroidDict = {}
-    for number, field in totalDict.items():
-        centroidDict[number] = {
-            'r': field['r'] / field['count'],
-            'g': field['g'] / field['count'],
-            'b': field['b'] / field['count']
-        }
-    return centroidDict
-
-def AppendColorFile(filepath: str, color: dict) -> None:
-    """
-    Appends a new color to the provided color file.
+    Reads the data from the provided color file.
     
     Args:
         filepath: The filepath to the color config file.
-        color: The color to appened.
+        
+    Returns:
+        A list of the data in the color file.
     """
 
-    with open(filepath, 'a', newline='') as colorCSV:
-        colorDictWriter = csv.DictWriter(colorCSV, ['number','r','g','b'])
-        colorDictWriter.writerow(color)
+    with open(filepath) as colorCSV:
+        colorDictReader = csv.DictReader(colorCSV, ['number','r','g','b'])
+        colorList = EliminateDuplicates(colorDictReader)
+        colorArray = ConvertToArray(colorList)
+    return colorArray
+
+def ReadConfigFile(filepath: str) -> dict:
+    """
+    Reads the data from the provided config file.
+    
+    Args:
+        filepath: The filepath to the config file.
+        
+    Returns:
+        A dict of the data in the config file.
+    """
+
+    configDict = None
+    with open(filepath) as configFile:
+        configDict =  json.load(configFile)
+    return configDict
+
+def RecordData(data: dict, filepath: str) -> bool:
+    """
+    Records data to a CSV file.
+    
+    Args:
+        data: (dict) The data to be stored in the csv.
+        filepath: (str) The file path to the csv file.
+        
+    Returns:
+        True if the data was successfully stored to the CSV.
+    """
+
+    headers = ['test no.', 'score', 'highest value', 'total moves']
+    try:
+        with open(filepath, 'w') as output:
+            outputDictWriter = csv.DictWriter(output, headers)
+            outputDictWriter.writeheader()
+            outputDictWriter.writerow(data)
+        return True
+    except ValueError:
+        print("CSV File error occured.")
+        return False
+
+
+
+
+
+
+
+
+
+

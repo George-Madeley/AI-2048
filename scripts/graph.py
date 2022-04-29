@@ -1,6 +1,13 @@
+"""
+Author: George Madeley,
+Date: 29/04/2022
+
+Description:
+    - Draws the feature vectors from colors.csv to a 3D graph.
+"""
+
 import sys
 import matplotlib.pyplot as plt
-import numpy as np
 import csv
 
 def GetMarker(number: int) -> str:
