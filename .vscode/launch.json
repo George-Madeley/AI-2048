@@ -5,12 +5,24 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Graph.py",
+            "type": "python",
+            "request": "launch",
+            "program": "scripts/graph.py",
+            "console": "integratedTerminal",
+            "args": [
+                "config/colors.csv"
+            ]
+        },
+        {
             "name": "App.py",
             "type": "python",
             "request": "launch",
             "program": "scripts/app.py",
             "console": "integratedTerminal",
-            "args": ["config/appsettings.json"]
+            "args": [
+                "config/appsettings.json"
+            ]
         }
     ]
 }

@@ -10,6 +10,7 @@ pillow = "*"
 pynput = "*"
 numpy = "*"
 webdriver-manager = "*"
+matplotlib = "*"
 
 [dev-packages]
 
