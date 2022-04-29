@@ -2,9 +2,10 @@
 This script holds the functionality for the program to take a screenshot, read data from the screen shot and enter in controls.
 """
 
-from asyncio.log import logger
 import logging
 import math
+from statistics import mode
+import numpy as np
 import pyautogui
 from PIL import Image
 from pynput.keyboard import Key, Controller as KeyController
@@ -43,7 +44,7 @@ def DivideImage(image: Image, config: dict) -> list:
         dividedImage.append(dividedRow)
     return dividedImage
 
-def GetTileNumber(image: Image, colorConfig: dict, margin: int, filepath: str) -> int:
+def GetTileNumber(image: Image, colorList: list, K: int  = 3) -> int:
     """
     Gets the background color of the image.
 
@@ -57,19 +58,37 @@ def GetTileNumber(image: Image, colorConfig: dict, margin: int, filepath: str) -
         The number in the tile.
     """
     color = GetColorValue(image)
-    for number, colorCode in colorConfig.items():
-        if (colorCode["r"] - margin <= color["r"] <= colorCode["r"] + margin and
-            colorCode["g"] - margin <= color["g"] <= colorCode["g"] + margin and
-            colorCode["b"] - margin <= color["b"] <= colorCode["b"] + margin):
-            return number
-    number = int(input("What number does this color relate to?:\t"))
-    AppendColorFile(filepath, {
-        "number": number,
-        "r": color["r"],
-        "g": color["g"],
-        "b": color["b"]
-    })
-    return number
+    color = np.array(list(color.values()))
+    distances = []
+    for number, colorCode in colorList:
+        dist = np.linalg.norm(color - colorCode)
+        distances.append((number, dist))
+    distances.sort(key = lambda x: x[1])
+    topK = distances[:K][0]
+    top = mode(topK)
+    logging.debug(f"top: {top}")
+    number = int(input("What is the actual Number:\t"))
+    if number != top:
+        return number
+    return top
+
+def CalculateDistance(color1: dict, color2: dict) -> float:
+    """
+    Calculates the distance between two color values.
+    
+    Args:
+        color1: A dict of rgb color values.
+        color2: A dict of rgb color values.
+    
+    Returns:
+        The distance between the two values.
+    """
+
+    diffR = color1['r'] - color2['r']
+    diffG = color1['g'] - color2['g']
+    diffB = color1['b'] - color2['b']
+    totalSquared = diffR ** 2 + diffG ** 2 + diffB ** 2
+    return float(math.sqrt(totalSquared))
 
 def GetColorValue(image: Image) -> dict:
     """
@@ -99,7 +118,7 @@ def GetColorValue(image: Image) -> dict:
         "b": math.floor(finalColor[2])
     }
 
-def GetInformation(config: dict, colorConfig: dict):
+def GetInformation(config: dict, colorList: list):
     """
     Reads the screen to update the programs copy of the current state of 2048.
     
@@ -134,9 +153,8 @@ def GetInformation(config: dict, colorConfig: dict):
                 sampleImage = dividedImage[j][i]
                 tileNumberList[j][i] = GetTileNumber(
                     sampleImage,
-                    colorConfig,
-                    config['colormargin'],
-                    config['colors']
+                    colorList,
+                    config['knn']
                 )
     return tileNumberList
     

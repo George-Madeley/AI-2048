@@ -17,7 +17,7 @@ def main():
     # Load in the congif files
     configFilePath = GetSystemArgs()
     config = ReadConfigFile(configFilePath)
-    colorDict = ReadColorFile(config['colors'])
+    colorList = ReadColorFile(config['colors'])
 
     # Launch the web driver
     options = Options()
@@ -27,15 +27,15 @@ def main():
     with webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options) as driver:
         driver.get(config['url'])
         # Play the game
-        PlayGame(config, colorDict)
+        PlayGame(config, colorList)
 
-def PlayGame(config: dict, colorDict: dict) -> None:
+def PlayGame(config: dict, colorList: list) -> None:
     """
     Loops over the game until the game is over.
     
     Args:
         config: The configuration dict.
-        colorDict: The dict of all known colors.
+        colorDict: The list of all known colors.
     """
     # Define an instance of Agent
     agent = Agent()
@@ -52,7 +52,7 @@ def PlayGame(config: dict, colorDict: dict) -> None:
         # Sleep
         time.sleep(config['turndelay'])
         # Read data from screen
-        tileNumberList = GetInformation(config, colorDict)
+        tileNumberList = GetInformation(config, colorList)
         # Check if game over.
         time.sleep(config['turndelay'])
         

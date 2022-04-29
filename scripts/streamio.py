@@ -4,6 +4,7 @@ This script holds the functionality to record data to the record files.
 
 import csv
 import json
+import numpy as np
 
 def RecordData(data: dict, filepath: str) -> bool:
     """
@@ -44,7 +45,7 @@ def ReadConfigFile(filepath: str) -> dict:
         configDict =  json.load(configFile)
     return configDict
 
-def ReadColorFile(filepath: str) -> dict:
+def ReadColorFile(filepath: str) -> list:
     """
     Reads the data from the provided color file.
     
@@ -52,21 +53,93 @@ def ReadColorFile(filepath: str) -> dict:
         filepath: The filepath to the color config file.
         
     Returns:
-        A dict of the data in the color file.
+        A list of the data in the color file.
     """
 
-    colorDict = {}
     with open(filepath) as colorCSV:
         colorDictReader = csv.DictReader(colorCSV, ['number','r','g','b'])
-        for row in colorDictReader:
-            number = row['number']
-            if number == 'number': continue
-            colorDict[number] = {
+        colorList = EliminateDuplicates(colorDictReader)
+        colorArray = ConvertToArray(colorList)
+    return colorArray
+
+def ConvertToArray(oldList: list) -> list:
+    """
+    Converts the list of dicts to a list of tuples containing the key and the numpy array.
+    
+    Args:
+        oldList: The old list of dicts.
+        
+    Returns:
+        The list of tuples.
+    """
+
+    newList = []
+    for dictionary in oldList:
+        newList.append((
+            dictionary['number'],
+            np.array(list(dictionary.values())[1:])
+        ))
+    return newList
+
+def EliminateDuplicates(oldList: list) -> list:
+    """
+    Eliminates any duplicate data from the list.
+    
+    Args:
+        oldList: The list to elimate duplicate data from.
+        
+    Returns:
+        A list with no duplicate data.
+    """
+
+    newList = []
+    for row in oldList:
+        if row in newList: continue
+        if row['number'] == 'number': continue
+        newList.append({
+            'number': int(row['number']),
+            'r': int(row['r']),
+            'g': int(row['g']),
+            'b': int(row['b'])
+        })
+    return newList
+
+
+def CalculateCentroids(colorDict: dict) -> dict:
+    """
+    Calculates the centroid of each color.
+    
+    Args:
+        The color dict from the read color file.
+        
+    Returns:
+        A dict of all the color centroids.
+    """
+
+    totalDict = {}
+    for row in colorDict:
+        number = row['number']
+        if number == 'number': continue
+        if number not in totalDict.keys():
+            totalDict[number] = {
                 'r': int(row['r']),
                 'g': int(row['g']),
-                'b': int(row['b'])
+                'b': int(row['b']),
+                'count': 1
             }
-    return colorDict
+        else:
+            totalDict[number]['r'] += int(row['r'])
+            totalDict[number]['g'] += int(row['g'])
+            totalDict[number]['b'] += int(row['b'])
+            totalDict[number]['count'] += 1
+    centroidDict = {}
+    for number, field in totalDict.items():
+        centroidDict[number] = {
+            'r': field['r'] / field['count'],
+            'g': field['g'] / field['count'],
+            'b': field['b'] / field['count']
+        }
+    return centroidDict
 
 def AppendColorFile(filepath: str, color: dict) -> None:
     """
