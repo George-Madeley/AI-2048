@@ -22,7 +22,7 @@ class GameState:
 
         if self.__score: return self.__score
 
-        self.__score = np.sum(self.array)
+        self.__score = self.CalculateScore()
         return self.__score
 
     def GenerateChildren(self):
@@ -33,12 +33,12 @@ class GameState:
             A dict of all the possible child states.
         """
 
-        return {
-            'up': self.GenerateUpChild(),
-            'right': self.GenerateRightChild(),
-            'down': self.GenerateDownChild(),
-            'left': self.GenerateLeftChild()
-        }
+        return [
+            self.GenerateUpChild(),
+            self.GenerateRightChild(),
+            self.GenerateDownChild(),
+            self.GenerateLeftChild()
+        ]
 
     def GenerateUpChild(self):
         """
@@ -100,7 +100,7 @@ class GameState:
                     # if there is a blank space to the right, move element into that space
                     if blankSpaceRight:
                         tempArray[y, tempX + 1] = element
-                        tempArray[y, tempX + 1] = 0
+                        tempArray[y, tempX] = 0
                         tempX += 1
                     # if there is no space, check if there is an element with the same value
                     else:
@@ -108,7 +108,7 @@ class GameState:
                         # if there is an element with the same value, combine
                         if sameValueRight:
                             tempArray[y, tempX + 1] += element
-                            tempArray[y, tempX + 1] = 0
+                            tempArray[y, tempX] = 0
                         break
         return GameState(tempArray, self.maxDepth, depth=self.depth + 1)
 
@@ -172,7 +172,7 @@ class GameState:
                     # if there is a blank space to the left, move element into that space
                     if blankSpaceLeft:
                         tempArray[y, tempX - 1] = element
-                        tempArray[y, tempX - 1] = 0
+                        tempArray[y, tempX] = 0
                         tempX -= 1
                     # if there is no space, check if there is an element with the same value
                     else:
@@ -180,10 +180,67 @@ class GameState:
                         # if there is an element with the same value, combine
                         if sameValueLeft:
                             tempArray[y, tempX - 1] += element
-                            tempArray[y, tempX - 1] = 0
+                            tempArray[y, tempX] = 0
                         break
         return GameState(tempArray, self.maxDepth, depth=self.depth + 1)
 
-                    
+    def CalculateScore(self) -> int:
+        """
+        Calculates the states score.
+        
+        Returns:
+            The score.
+        """
 
+        scoresArray = self.SumProductOfFourAdjacentTiles()
+        return np.sum(scoresArray)
+
+    def SumProductOfFourAdjacentTiles(self) -> np.array:
+        """
+        Scans through each tile and sums the products of its value and the values of neighboring tiles.
+        
+        Returns:
+            np.array of the resulting values.
+        """
+        
+        sizeY, sizeX = self.array.shape
+        tempArray = np.zeros((sizeY, sizeX))
+        boundY = range(sizeY)
+        boundX = range(sizeX)
+        for y in boundY:
+            for x in boundX:
+                total = 0
+                if x - 1 in boundX:
+                    total += self.array[y][x] * self.array[y][x - 1]
+                if x + 1 in boundX:
+                    total += self.array[y][x] * self.array[y][x + 1]
+                if y - 1 in boundY:
+                    total += self.array[y][x] * self.array[y - 1][x]
+                if y + 1 in boundY:
+                    total += self.array[y][x] * self.array[y + 1][x]
+                tempArray[y][x] = total
+        return tempArray
+
+    def SumProductOfTwoAdjacentTiles(self) -> np.array:
+        """
+        Scans through each tile and sums the products of its value and the values of neighboring tiles.
+        
+        Returns:
+            np.array of the resulting values.
+        """
+        
+        sizeY, sizeX = self.array.shape
+        tempArray = np.zeros((sizeY, sizeX))
+        boundY = range(sizeY)
+        boundX = range(sizeX)
+        for y in boundY:
+            for x in boundX:
+                total = 0
+                if x - 1 in boundX:
+                    total += self.array[y][x] * self.array[y][x - 1]
+                if y - 1 in boundY:
+                    total += self.array[y][x] * self.array[y - 1][x]
+                tempArray[y][x] = total
+        return tempArray
+    
     
