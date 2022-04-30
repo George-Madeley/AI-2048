@@ -27,16 +27,26 @@ class Agent:
         Returns:
             The best next move.
         """
+        # Find best score
         score = self.GetBestChildStateScore()
-        path = self.FindPath(score)
-        if path == None:
+        # If best score is -1, there are no more possible moves.
+        if score == -1:
+            raise ValueError("Score was -1")
+
+        # Find path to the best score
+        path = self.FindPath(score, self.__gameState)
+
+        # If path is None, an Error has occured in finding the best score
+        if path is None:
             raise ValueError("Best Score calculated but could not be found.")
+
+        # Find the next move to make to get to the best score.
         for move, child in enumerate(self.__gameState.children):
+            if child is None: continue
             if child is path[1]:
                 return move
         raise ValueError("Next move could not be found.")
         
-
     def GetBestChildStateScore(self) -> int:
         """
         Searches through the game state tree to find the leaf with the highest score.
@@ -45,10 +55,11 @@ class Agent:
             The highest Score.
         """
 
-        bestScore = 0
+        bestScore = -1
         frontier = [self.__gameState]
         while frontier:
             state = frontier.pop(0)
+            if state is None: continue
             if hasattr(state, 'children'):
                 frontier.extend(state.children)
             else:
@@ -56,7 +67,7 @@ class Agent:
                     bestScore = state.score
         return bestScore
 
-    def FindPath(self, score: int, state: object = None) -> any:
+    def FindPath(self, score: int, state: object) -> any:
         """
         Finds the path to the leaf with the given score.
 
@@ -68,7 +79,7 @@ class Agent:
             The path to the goal state or None value.
         """
 
-        if state == None: state = self.__gameState
+        if state is None: return None
         
         if hasattr(state, 'children'):
             for child in state.children:
@@ -81,5 +92,4 @@ class Agent:
                 return [state]
             else:
                 return None
-
 

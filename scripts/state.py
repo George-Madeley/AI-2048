@@ -74,6 +74,9 @@ class GameState:
                             tempArray[tempY - 1, x] += element
                             tempArray[tempY, x] = 0
                         break
+        # Check if child array is the same as parent array
+        if np.array_equal(tempArray, self.array):
+            return None
         return GameState(tempArray, self.maxDepth, depth=self.depth + 1)
 
     def GenerateRightChild(self):
@@ -110,6 +113,9 @@ class GameState:
                             tempArray[y, tempX + 1] += element
                             tempArray[y, tempX] = 0
                         break
+        # Check if child array is the same as parent array
+        if np.array_equal(tempArray, self.array):
+            return None
         return GameState(tempArray, self.maxDepth, depth=self.depth + 1)
 
     def GenerateDownChild(self):
@@ -146,6 +152,9 @@ class GameState:
                             tempArray[tempY + 1, x] += element
                             tempArray[tempY, x] = 0
                         break
+        # Check if child array is the same as parent array
+        if np.array_equal(tempArray, self.array):
+            return None
         return GameState(tempArray, self.maxDepth, depth=self.depth + 1)
 
     def GenerateLeftChild(self):
@@ -182,6 +191,9 @@ class GameState:
                             tempArray[y, tempX - 1] += element
                             tempArray[y, tempX] = 0
                         break
+        # Check if child array is the same as parent array
+        if np.array_equal(tempArray, self.array):
+            return None
         return GameState(tempArray, self.maxDepth, depth=self.depth + 1)
 
     def CalculateScore(self) -> int:
@@ -242,5 +254,4 @@ class GameState:
                     total += self.array[y][x] * self.array[y - 1][x]
                 tempArray[y][x] = total
         return tempArray
-    
     
