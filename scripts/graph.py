@@ -84,6 +84,19 @@ with open(filename) as colorCSV:
         color = GetHexColor(r, g, b)
         ax.scatter(r, g, b, marker=marker, color=color)
 
+alreadyPlotted.sort(key = lambda x: x[0])
+
+with open(filename[:-4] + '-copy.csv', 'w', newline='') as colorCSV:
+    colorDictWriter = csv.DictWriter(colorCSV, ['number', 'r', 'g', 'b'])
+    colorDictWriter.writeheader()
+    for row in alreadyPlotted:
+        colorDictWriter.writerow({
+            'number': row[0],
+            'r': row[1],
+            'g': row[2],
+            'b': row[3]
+        })
+
 ax.set_xlabel('Red')
 ax.set_ylabel('Green')
 ax.set_zlabel('Blue')
