@@ -25,6 +25,10 @@ class GameState:
         self.__score = self.CalculateScore()
         return self.__score
 
+    @score.setter
+    def score(self, value: int):
+        self.__score = value
+
     def GenerateChildren(self):
         """
         Generates the four possible child states.
@@ -196,6 +200,16 @@ class GameState:
             return None
         return GameState(tempArray, self.maxDepth, depth=self.depth + 1)
 
+    def RemoveChild(self, index: int) -> None:
+        """
+        Removes a child from the list of children at the given index.
+        
+        Args:
+            index: The index of the child to remove.
+        """
+
+        self.children[index] = None
+
     def CalculateScore(self) -> int:
         """
         Calculates the states score.
@@ -204,7 +218,7 @@ class GameState:
             The score.
         """
 
-        scoresArray = self.SumProductOfFourAdjacentTiles()
+        scoresArray = self.SumProductOfTwoAdjacentTiles()
         return np.sum(scoresArray)
 
     def SumProductOfFourAdjacentTiles(self) -> np.array:

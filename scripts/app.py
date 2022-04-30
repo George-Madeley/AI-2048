@@ -52,7 +52,7 @@ def PlayGame(config: dict, colorList: list) -> None:
     """
     # Define an instance of Agent
     agent = Agent(config['maxdepth'])
-    gameOver = False
+    nextMove = 0
     turnNumber = 0
 
     # Use mouse to remove popup window
@@ -62,24 +62,33 @@ def PlayGame(config: dict, colorList: list) -> None:
     ClickMouse(mouseX, mouseY)
 
     predictedArray = None
+    previoustileNumberList = None
 
-    while not gameOver:
+    while nextMove >= 0:
         # Sleep
         time.sleep(config['turndelay'])
         # Read data from screen
         tileNumberList, tileColorList = GetInformation(config, colorList)
         # Compare prediected and read arrays
         CompareStates(tileNumberList, predictedArray, tileColorList, colorList, config)
-        # Check if game over.
-        if gameOver:
+        # Check if the last move was redundant
+        if previoustileNumberList == tileNumberList:
+            # if so,remove that move from the list of possible moves and get the next move.
+            nextMove = agent.GetNextMove(tileNumberList, nextMove)
+            turnNumber -= 1
+        else:
+            # Pass data to agent and get responce from agent
+            nextMove = agent.GetNextMove(tileNumberList)
+        # Checks if game is over
+        if nextMove < 0:
             break
-        # Pass data to agent and get responce from agent
-        nextMove = agent.GetNextMove(tileNumberList)
         predictedArray = agent.GetArrayOfNextMove(nextMove)
         # Enter response
         PressKey(nextMove)
+        # update previous tile number list
+        previoustileNumberList = tileNumberList
         turnNumber += 1
-    RecordData({
+    RecordData(config['recordfile'], {
         "score": CalculateScore(tileNumberList),
         "highest value": GetHighestTile(tileNumberList),
         "total moves": turnNumber

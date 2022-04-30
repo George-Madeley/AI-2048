@@ -13,9 +13,22 @@ class Agent:
         self.__gameState: GameState = None
         self.maxDepth = maxDepth
 
-    def GetNextMove(self, tileNumberList):
+    def GetNextMove(self, tileNumberList: list, moveToRemove: int = None) -> int:
+        """
+        Gets the best possible move.
+        
+        Args:
+            tileNumberList: A list of the read tile values.
+            moveToRemove: A number representing the move to remove.
+            
+        Returns:
+            A number representing the next move to take.
+        """
         array = np.array(tileNumberList)
-        self.__gameState = GameState(array, self.maxDepth)
+        if moveToRemove is not None:
+            self.__gameState.RemoveChild(moveToRemove)
+        else:
+            self.__gameState = GameState(array, self.maxDepth)
         nextMove = self.FindBestMove()
         return nextMove
 
@@ -30,7 +43,7 @@ class Agent:
         score = self.GetBestChildStateScore()
         # If best score is -1, there are no more possible moves.
         if score == -1:
-            raise ValueError("Score was -1")
+            return -1
 
         # Find path to the best score
         path = self.FindPath(score, self.__gameState)
