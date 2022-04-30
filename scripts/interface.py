@@ -16,6 +16,7 @@ from statistics import mode
 import numpy as np
 import pyautogui
 from PIL import Image
+from streamio import AppendColorFile
 from pynput.keyboard import Key, Controller as KeyController
 from pynput.mouse import Button, Controller as MouseController
 
@@ -55,16 +56,32 @@ def GetInformation(config: dict, colorList: list):
         # Get list of numbers
         gridsize = config['2048']['gridsize']
         tileNumberList = [[0 for i in range(gridsize)] for j in range(gridsize)]
+        tileColorList = [[0 for i in range(gridsize)] for j in range(gridsize)]
         for j in range(gridsize):
             for i in range(gridsize):
                 # logging.debug(f'j:{j + 1}, i:{i + 1}')
                 sampleImage = dividedImage[j][i]
-                tileNumberList[j][i] = GetTileNumber(
+                tileNumberList[j][i], tileColorList[j][i] = GetTileNumber(
                     sampleImage,
                     colorList,
                     config['knn']
                 )
-    return tileNumberList
+    # logging.debug('If the following correct?')
+    # print(np.array(tileNumberList))
+    # response = input("Y/N?:\t").lower() == "y"
+    # if not response:
+    #     print("location?")
+    #     x = int(input("X:\t")) - 1
+    #     y = int(input("Y:\t")) - 1
+    #     sampleImage = dividedImage[y][x]
+    #     GetTileNumber(
+    #         sampleImage,
+    #         colorList,
+    #         config['knn'],
+    #         record=True,
+    #         filepath=config['colors']
+    #     )
+    return tileNumberList, tileColorList
 
 def GetScreenshot() -> str:
     """
@@ -125,7 +142,7 @@ def CalculateDistance(color1: dict, color2: dict) -> float:
     totalSquared = diffR ** 2 + diffG ** 2 + diffB ** 2
     return float(math.sqrt(totalSquared))
 
-def GetTileNumber(image: Image, colorList: list, K: int  = 3) -> int:
+def GetTileNumber(image: Image, colorList: list, K: int  = 3, record: bool = False, filepath: str = None) -> int:
     """
     Gets the background color of the image.
 
@@ -137,6 +154,7 @@ def GetTileNumber(image: Image, colorList: list, K: int  = 3) -> int:
 
     Returns:
         The number in the tile.
+        The np.array of the color values.
     """
     color = GetColorValue(image)
     color = np.array(list(color.values()))
@@ -147,11 +165,19 @@ def GetTileNumber(image: Image, colorList: list, K: int  = 3) -> int:
     distances.sort(key = lambda x: x[1])
     topK = distances[:K][0]
     top = mode(topK)
+    if record:
+        number = int(input("Correct Value:\t"))
+        AppendColorFile(filepath,{
+            'number': number,
+            'r': color[0],
+            'g': color[1],
+            'b': color[2]
+        })
     # logging.debug(f"top: {top}")
     # number = int(input("What is the actual Number:\t"))
     # if number != top:
     #     return number
-    return top
+    return top, color
 
 def GetColorValue(image: Image) -> dict:
     """

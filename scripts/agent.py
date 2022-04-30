@@ -3,7 +3,6 @@ This script holds the agent class and functionality for the agent to solve the p
 """
 
 from random import randint
-from turtle import st
 from state import GameState
 
 import numpy as np
@@ -93,3 +92,15 @@ class Agent:
             else:
                 return None
 
+    def GetArrayOfNextMove(self, move: int) -> object:
+        """
+        Gets the next array of the provided move.
+        
+        Args:
+            move: The move number.
+            
+        Returns:
+            The array made from performing the given move.
+        """
+
+        return self.__gameState.children[move].array

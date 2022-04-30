@@ -13,10 +13,12 @@ import sys
 import time
 import logging
 
+import numpy as np
+
 
 from streamio import ReadConfigFile, ReadColorFile, RecordData
 from agent import Agent
-from interface import GetInformation, PressKey, ClickMouse
+from interface import GetInformation, PressKey, ClickMouse, AppendColorFile
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -59,16 +61,21 @@ def PlayGame(config: dict, colorList: list) -> None:
     mouseY = config["button1"]["y"]
     ClickMouse(mouseX, mouseY)
 
+    predictedArray = None
+
     while not gameOver:
         # Sleep
         time.sleep(config['turndelay'])
         # Read data from screen
-        tileNumberList = GetInformation(config, colorList)
+        tileNumberList, tileColorList = GetInformation(config, colorList)
+        # Compare prediected and read arrays
+        CompareStates(tileNumberList, predictedArray, tileColorList, colorList, config)
         # Check if game over.
         if gameOver:
             break
         # Pass data to agent and get responce from agent
         nextMove = agent.GetNextMove(tileNumberList)
+        predictedArray = agent.GetArrayOfNextMove(nextMove)
         # Enter response
         PressKey(nextMove)
         turnNumber += 1
@@ -128,6 +135,66 @@ def GetSystemArgs() -> str:
         raise ValueError("Incorrect number of input arguments.")
     else:
         return sys.argv[1]
+
+def CompareStates(
+    currentArray: np.ndarray,
+    predictedArray: np.ndarray,
+    tileColorList: list,
+    colorList: list,
+    config: dict) -> None:
+    """
+    Compares the two given arrays.
+    
+    Args:
+        currentArray: The current read array.
+        predictedArray: The AI predicted array.
+        tileColorList: The list of read colors.
+        colorList: The list of known colors.
+    """
+
+    if predictedArray is None: return
+
+    height, width = predictedArray.shape
+    for y in range(height):
+        for x in range(width):
+            if predictedArray[y][x] != currentArray[y][x]:
+                if currentArray[y][x] <= 4: continue
+                colorCode = tileColorList[y][x]
+                if not IsColorInColorList(colorCode, colorList):
+                    AppendColorFile(config['colors'], {
+                        'number': predictedArray[y][x],
+                        'r': colorCode[0],
+                        'g': colorCode[1],
+                        'b': colorCode[2]
+                    })
+            else:
+                colorCode = tileColorList[y][x]
+                if not IsColorInColorList(colorCode, colorList):
+                    AppendColorFile(config['colors'], {
+                        'number': predictedArray[y][x],
+                        'r': colorCode[0],
+                        'g': colorCode[1],
+                        'b': colorCode[2]
+                    })
+
+
+def IsColorInColorList(color: np.ndarray, colorList: list) -> bool:
+    """
+    Checks if a given color is within the list of known colors.
+    
+    Args:
+        color: The color to find.
+        colorList: The list of known colors.
+        
+    Returns:
+        True if color is in the list of known colors.
+    """
+
+    knownColors = [(row[1][0], row[1][1], row[1][2]) for row in colorList]
+    color = (color[0], color[1], color[2])
+    return color in knownColors
+
+
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.debug('== Start of Program ==')

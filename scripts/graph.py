@@ -86,7 +86,7 @@ with open(filename) as colorCSV:
 
 alreadyPlotted.sort(key = lambda x: x[0])
 
-with open(filename[:-4] + '-copy.csv', 'w', newline='') as colorCSV:
+with open(filename, 'w', newline='') as colorCSV:
     colorDictWriter = csv.DictWriter(colorCSV, ['number', 'r', 'g', 'b'])
     colorDictWriter.writeheader()
     for row in alreadyPlotted:
