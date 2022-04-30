@@ -31,6 +31,16 @@ def GetMarker(number: int) -> str:
         return 's'
     elif number == 16:
         return 'd'
+    elif number == 32:
+        return '1'
+    elif number == 64:
+        return '+'
+    elif number == 128:
+        return 'p'
+    elif number == 256:
+        return '.'
+    elif number == 512:
+        return '4'
     else:
         raise ValueError('Invalid number entered.')
 
