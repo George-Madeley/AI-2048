@@ -3,10 +3,17 @@ This script holds the agent class and functionality for the agent to solve the p
 """
 
 from random import randint
+from state import GameState
+
+import numpy as np
 
 
 class Agent:
-    pass
+    def __init__(self, maxDepth: int) -> None:
+        self.__gameState: GameState = None
+        self.maxDepth = maxDepth
 
     def GetNextMove(self, tileNumberList):
-        return randint(0,3)
+        array = np.array(tileNumberList)
+        self.__gameState = GameState(array, self.maxDepth)
+

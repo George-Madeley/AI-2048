@@ -49,7 +49,7 @@ def PlayGame(config: dict, colorList: list) -> None:
         colorDict: The list of all known colors.
     """
     # Define an instance of Agent
-    agent = Agent()
+    agent = Agent(config['maxdepth'])
     gameOver = False
     turnNumber = 0
 
