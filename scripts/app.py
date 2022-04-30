@@ -65,8 +65,6 @@ def PlayGame(config: dict, colorList: list) -> None:
         # Read data from screen
         tileNumberList = GetInformation(config, colorList)
         # Check if game over.
-        time.sleep(config['turndelay'])
-        
         if gameOver:
             break
         # Pass data to agent and get responce from agent

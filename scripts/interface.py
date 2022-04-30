@@ -57,7 +57,7 @@ def GetInformation(config: dict, colorList: list):
         tileNumberList = [[0 for i in range(gridsize)] for j in range(gridsize)]
         for j in range(gridsize):
             for i in range(gridsize):
-                logging.debug(f'j:{j + 1}, i:{i + 1}')
+                # logging.debug(f'j:{j + 1}, i:{i + 1}')
                 sampleImage = dividedImage[j][i]
                 tileNumberList[j][i] = GetTileNumber(
                     sampleImage,
@@ -147,10 +147,10 @@ def GetTileNumber(image: Image, colorList: list, K: int  = 3) -> int:
     distances.sort(key = lambda x: x[1])
     topK = distances[:K][0]
     top = mode(topK)
-    logging.debug(f"top: {top}")
-    number = int(input("What is the actual Number:\t"))
-    if number != top:
-        return number
+    # logging.debug(f"top: {top}")
+    # number = int(input("What is the actual Number:\t"))
+    # if number != top:
+    #     return number
     return top
 
 def GetColorValue(image: Image) -> dict:
