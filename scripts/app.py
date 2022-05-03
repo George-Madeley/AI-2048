@@ -63,7 +63,6 @@ def PlayGame(config: dict, colorList: list) -> None:
     ClickMouse(mouseX, mouseY)
 
     predictedArray = None
-    previoustileNumberList = None
 
     while True: #nextMove >= 0:
         # Sleep
@@ -72,23 +71,18 @@ def PlayGame(config: dict, colorList: list) -> None:
         tileNumberList, tileColorList = GetInformation(config, colorList)
         # Compare prediected and read arrays
         tileNumberList = CompareStates(tileNumberList, predictedArray, tileColorList, colorList, config)
-        # Check if the last move was redundant
-        if previoustileNumberList == tileNumberList:
-            # if so,remove that move from the list of possible moves and get the next move.
-            nextMove = agent.GetNextMove(tileNumberList, nextMove)
-            turnNumber -= 1
-        else:
-            # Pass data to agent and get responce from agent
-            nextMove = agent.GetNextMove(tileNumberList)
+        # Pass data to agent and get responce from agent
+        nextMove = agent.GetNextMove(tileNumberList)
         # Checks if game is over
         if nextMove < 0:
             break
         predictedArray = agent.GetArrayOfNextMove(nextMove)
+        # Sleep
+        time.sleep(config['turndelay'])
         # Enter response
         PressKey(nextMove)
-        # update previous tile number list
-        previoustileNumberList = tileNumberList
         turnNumber += 1
+
     RecordData(config['recordfile'], {
         "score": CalculateScore(tileNumberList),
         "highest value": GetHighestTile(tileNumberList),
@@ -164,14 +158,36 @@ def CompareStates(
 
     if predictedArray is None: return currentArray
 
-    # logging.debug('Predicted Array:')
-    # print(predictedArray)
-    # logging.debug('Read Array:')
-    # print(np.array(currentArray))
+    logging.debug('Predicted Array:')
+    print(predictedArray)
+    logging.debug('Read Array:')
+    print(np.array(currentArray))
     # if input("Does predicted match screen? [Y/n]\t").lower() == 'n':
     #     time.sleep(2)
     #     return currentArray
     # time.sleep(2)
+
+    if CountTileSpawns(predictedArray, currentArray) > 1:
+        logging.debug("The app believes two tiles have spawned at once. Please correct this.")
+        needCorrecting = True
+        while needCorrecting:
+            x = int(input("X:\t")) - 1
+            y = int(input("Y:\t")) - 1
+            value = int(input("Value:\t"))
+            currentArray[y][x] = value
+            colorCode = tileColorList[y][x]
+            AppendColorFile(config['colors'], {
+                'number': value,
+                'r': colorCode[0],
+                'g': colorCode[1],
+                'b': colorCode[2]
+            })
+            colorList.append((
+                value,
+                colorCode
+            ))
+            needCorrecting = input("Does the board need correcting? [Y/n]\t").lower() == 'y'
+            time.sleep(3)
 
     height, width = predictedArray.shape
     for y in range(height):
@@ -205,10 +221,9 @@ def CompareStates(
                         predictedArray[y][x],
                         colorCode
                     ))
-    # logging.debug('Updated Array:')
-    # print(np.array(currentArray))
+    logging.debug('Updated Array:')
+    print(np.array(currentArray))
     return currentArray
-
 
 def IsColorInColorList(color: np.ndarray, colorList: list) -> bool:
     """
@@ -225,6 +240,27 @@ def IsColorInColorList(color: np.ndarray, colorList: list) -> bool:
     knownColors = [(row[1][0], row[1][1], row[1][2]) for row in colorList]
     color = (color[0], color[1], color[2])
     return color in knownColors
+
+def CountTileSpawns(predictedArray: object, readArray: list) -> int:
+    """
+    Counts how many new tiles have been added to the board.
+    
+    Args:
+        predictedArray: What the agent predicted the board would be like.
+        readArray: The data read from the board.
+    
+    Returns:
+        The number of new tiles.
+    """
+
+    height, width = predictedArray.shape
+    count = 0
+    for y in range(height):
+        for x in range(width):
+            if predictedArray[y][x] != readArray[y][x]:
+                count += 1
+    return count
+
 
 
 

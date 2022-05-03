@@ -25,6 +25,7 @@ class Agent:
         Returns:
             A number representing the next move to take.
         """
+
         array = np.array(tileNumberList)
         if moveToRemove is not None:
             self.__gameState.RemoveChild(moveToRemove)
