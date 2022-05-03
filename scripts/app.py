@@ -9,6 +9,7 @@ Description:
     - Calculates scores.
 """
 
+from distutils.log import debug
 import sys
 import time
 import logging
@@ -64,7 +65,7 @@ def PlayGame(config: dict, colorList: list) -> None:
     predictedArray = None
     previoustileNumberList = None
 
-    while nextMove >= 0:
+    while True: #nextMove >= 0:
         # Sleep
         time.sleep(config['turndelay'])
         # Read data from screen
@@ -163,6 +164,15 @@ def CompareStates(
 
     if predictedArray is None: return
 
+    # logging.debug('Predicted Array:')
+    # print(predictedArray)
+    # logging.debug('Read Array:')
+    # print(currentArray)
+    # if input("Does predicted match screen? [Y/n]\t").lower() == 'n':
+    #     time.sleep(2)
+    #     return
+    # time.sleep(2)
+
     height, width = predictedArray.shape
     for y in range(height):
         for x in range(width):
@@ -176,7 +186,12 @@ def CompareStates(
                         'g': colorCode[1],
                         'b': colorCode[2]
                     })
+                    colorList.append((
+                        predictedArray[y][x],
+                        colorCode
+                    ))
             else:
+                if currentArray[y][x] <= 4: continue
                 colorCode = tileColorList[y][x]
                 if not IsColorInColorList(colorCode, colorList):
                     AppendColorFile(config['colors'], {

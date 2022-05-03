@@ -1,3 +1,4 @@
+from itertools import combinations
 import math
 from turtle import width
 import numpy as np
@@ -55,6 +56,8 @@ class GameState:
         # Gets array size
         height, width = self.array.shape
         tempArray = self.array.copy()
+        # Array where element is 1 if a combination just occured.
+        combinationArray = np.zeros(self.array.shape)
         for y in range(height):
             for x in range(width):
                 element = tempArray[y, x]
@@ -74,10 +77,12 @@ class GameState:
                     # if there is no space, check if there is an element with the same value
                     else:
                         sameValueAbove = tempArray[tempY - 1, x] == element
+                        canCombine = combinationArray[tempY - 1, x] == 0
                         # if there is an element with the same value, combine
-                        if sameValueAbove:
+                        if sameValueAbove and canCombine:
                             tempArray[tempY - 1, x] += element
                             tempArray[tempY, x] = 0
+                            combinationArray[tempY - 1, x] = 1
                         break
         # Check if child array is the same as parent array
         if np.array_equal(tempArray, self.array):
@@ -94,6 +99,8 @@ class GameState:
         # Gets array size
         height, width = self.array.shape
         tempArray = self.array.copy()
+        # Array where element is 1 if a combination just occured.
+        combinationArray = np.zeros(self.array.shape)
         for x in reversed(range(width)):
             for y in range(height):
                 element = tempArray[y, x]
@@ -113,10 +120,12 @@ class GameState:
                     # if there is no space, check if there is an element with the same value
                     else:
                         sameValueRight = tempArray[y, tempX + 1] == element
+                        canCombine = combinationArray[y, tempX + 1] == 0
                         # if there is an element with the same value, combine
-                        if sameValueRight:
+                        if sameValueRight and canCombine:
                             tempArray[y, tempX + 1] += element
                             tempArray[y, tempX] = 0
+                            combinationArray[y, tempX + 1] = 1
                         break
         # Check if child array is the same as parent array
         if np.array_equal(tempArray, self.array):
@@ -133,6 +142,8 @@ class GameState:
         # Gets array size
         height, width = self.array.shape
         tempArray = self.array.copy()
+        # Array where element is 1 if a combination just occured.
+        combinationArray = np.zeros(self.array.shape)
         for y in reversed(range(height)):
             for x in reversed(range(width)):
                 element = tempArray[y, x]
@@ -152,10 +163,12 @@ class GameState:
                     # if there is no space, check if there is an element with the same value
                     else:
                         sameValueBelow = tempArray[tempY + 1, x] == element
+                        canCombine = combinationArray[tempY + 1, x] == 0
                         # if there is an element with the same value, combine
-                        if sameValueBelow:
+                        if sameValueBelow and canCombine:
                             tempArray[tempY + 1, x] += element
                             tempArray[tempY, x] = 0
+                            combinationArray[tempY + 1, x] = 1
                         break
         # Check if child array is the same as parent array
         if np.array_equal(tempArray, self.array):
@@ -172,6 +185,8 @@ class GameState:
         # Gets array size
         height, width = self.array.shape
         tempArray = self.array.copy()
+        # Array where element is 1 if a combination just occured.
+        combinationArray = np.zeros(self.array.shape)
         for x in range(width):
             for y in reversed(range(height)):
                 element = tempArray[y, x]
@@ -191,10 +206,12 @@ class GameState:
                     # if there is no space, check if there is an element with the same value
                     else:
                         sameValueLeft = tempArray[y, tempX - 1] == element
+                        canCombine = combinationArray[y, tempX - 1] == 0
                         # if there is an element with the same value, combine
-                        if sameValueLeft:
+                        if sameValueLeft and canCombine:
                             tempArray[y, tempX - 1] += element
                             tempArray[y, tempX] = 0
+                            combinationArray[y, tempX - 1] = 1
                         break
         # Check if child array is the same as parent array
         if np.array_equal(tempArray, self.array):

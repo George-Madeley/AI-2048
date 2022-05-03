@@ -13,6 +13,7 @@ Description:
 import logging
 import math
 from statistics import mode
+from tempfile import tempdir
 import numpy as np
 import pyautogui
 from PIL import Image
@@ -74,13 +75,30 @@ def GetInformation(config: dict, colorList: list):
     #     x = int(input("X:\t")) - 1
     #     y = int(input("Y:\t")) - 1
     #     sampleImage = dividedImage[y][x]
-    #     GetTileNumber(
+    #     tileNumberList[y][x], tileColorList[y][x] = GetTileNumber(
     #         sampleImage,
     #         colorList,
     #         config['knn'],
     #         record=True,
     #         filepath=config['colors']
     #     )
+    # else:
+    #     for j in range(gridsize):
+    #         for i in range(gridsize):
+    #             tempTuple = (
+    #                 tileNumberList[j][i],
+    #                 tileColorList[j][i]
+    #             )
+    #             if tempTuple not in colorList:
+    #                 colorList.append(tempTuple)
+    #                 AppendColorFile(config['colors'],{
+    #                     'number': tileNumberList[j][i],
+    #                     'r': tileColorList[j][i][0],
+    #                     'g': tileColorList[j][i][1],
+    #                     'b': tileColorList[j][i][2]
+    #                 })
+
+
     return tileNumberList, tileColorList
 
 def GetScreenshot() -> str:
@@ -156,28 +174,38 @@ def GetTileNumber(image: Image, colorList: list, K: int  = 3, record: bool = Fal
         The number in the tile.
         The np.array of the color values.
     """
-    color = GetColorValue(image)
-    color = np.array(list(color.values()))
-    distances = []
-    for number, colorCode in colorList:
-        dist = np.linalg.norm(color - colorCode)
-        distances.append((number, dist))
-    distances.sort(key = lambda x: x[1])
-    topK = distances[:K][0]
-    top = mode(topK)
-    if record:
-        number = int(input("Correct Value:\t"))
-        AppendColorFile(filepath,{
-            'number': number,
-            'r': color[0],
-            'g': color[1],
-            'b': color[2]
-        })
+
+    try:
+        color = GetColorValue(image)
+        color = list(color.values())
+        distances = []
+        for number, colorCode in colorList:
+            dist = np.linalg.norm(np.array(color) - np.array(colorCode))
+            distances.append((number, dist))
+        distances.sort(key = lambda x: x[1])
+        topK = distances[:K][0]
+        top = mode(topK)
+        if record: raise ValueError
     # logging.debug(f"top: {top}")
     # number = int(input("What is the actual Number:\t"))
     # if number != top:
     #     return number
-    return top, color
+        return top, color
+    except:
+        if record:
+            number = int(input("Correct Value:\t"))
+            AppendColorFile(filepath,{
+                'number': number,
+                'r': color[0],
+                'g': color[1],
+                'b': color[2]
+            })
+            colorList.append((
+                number,
+                color
+            ))
+            return number, color
+        return 0, color
 
 def GetColorValue(image: Image) -> dict:
     """

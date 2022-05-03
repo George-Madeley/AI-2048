@@ -76,7 +76,7 @@ def ConvertToArray(oldList: list) -> list:
     for dictionary in oldList:
         newList.append((
             dictionary['number'],
-            np.array(list(dictionary.values())[1:])
+            list(dictionary.values())[1:]
         ))
     return newList
 
@@ -136,13 +136,13 @@ def ReadConfigFile(filepath: str) -> dict:
         configDict =  json.load(configFile)
     return configDict
 
-def RecordData(data: dict, filepath: str) -> bool:
+def RecordData( filepath: str, data: dict) -> bool:
     """
     Records data to a CSV file.
     
     Args:
-        data: (dict) The data to be stored in the csv.
         filepath: (str) The file path to the csv file.
+        data: (dict) The data to be stored in the csv.
         
     Returns:
         True if the data was successfully stored to the CSV.
