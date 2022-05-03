@@ -338,14 +338,26 @@ class GameState:
             for x in boundX:
                 if self.array[y][x] == 0: continue
                 total = 0
-                if x - 1 in boundX and self.array[y][x - 1] != 0:
-                    total += abs(math.log2(self.array[y][x]) - math.log2(self.array[y][x - 1]))
-                if x + 1 in boundX and self.array[y][x + 1] != 0:
-                    total += abs(math.log2(self.array[y][x]) - math.log2(self.array[y][x + 1]))
-                if y - 1 in boundY and self.array[y - 1][x] != 0:
-                    total += abs(math.log2(self.array[y][x]) - math.log2(self.array[y - 1][x]))
-                if y + 1 in boundY and self.array[y + 1][x] != 0:
-                    total += abs(math.log2(self.array[y][x]) - math.log2(self.array[y + 1][x]))
+                if x - 1 in boundX:
+                    if self.array[y][x - 1] != 0:
+                        total += abs(math.log2(self.array[y][x]) - math.log2(self.array[y][x - 1]))
+                    else:
+                        total += math.log2(self.array[y][x])
+                if x + 1 in boundX: 
+                    if self.array[y][x + 1] != 0:
+                        total += abs(math.log2(self.array[y][x]) - math.log2(self.array[y][x + 1]))
+                    else:
+                        total += math.log2(self.array[y][x])
+                if y - 1 in boundY:
+                    if self.array[y - 1][x] != 0:
+                        total += abs(math.log2(self.array[y][x]) - math.log2(self.array[y - 1][x]))
+                    else:
+                        total += math.log2(self.array[y][x])
+                if y + 1 in boundY:
+                    if self.array[y + 1][x] != 0:
+                        total += abs(math.log2(self.array[y][x]) - math.log2(self.array[y + 1][x]))
+                    else:
+                        total += math.log2(self.array[y][x])
                 tempArray[y][x] = total
         return tempArray
 

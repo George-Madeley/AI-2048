@@ -288,3 +288,13 @@ def PressKey(keyNum: int) -> None:
         keyboard.release(Key.left)
     else:
         raise ValueError
+
+def AltTab() -> None:
+    """
+    Presses Alt tab.
+    """
+
+    keyboard = KeyController()
+    with keyboard.pressed(Key.alt):
+        keyboard.press(Key.tab)
+        keyboard.release(Key.tab)

@@ -71,7 +71,7 @@ def PlayGame(config: dict, colorList: list) -> None:
         # Read data from screen
         tileNumberList, tileColorList = GetInformation(config, colorList)
         # Compare prediected and read arrays
-        CompareStates(tileNumberList, predictedArray, tileColorList, colorList, config)
+        tileNumberList = CompareStates(tileNumberList, predictedArray, tileColorList, colorList, config)
         # Check if the last move was redundant
         if previoustileNumberList == tileNumberList:
             # if so,remove that move from the list of possible moves and get the next move.
@@ -162,22 +162,22 @@ def CompareStates(
         colorList: The list of known colors.
     """
 
-    if predictedArray is None: return
+    if predictedArray is None: return currentArray
 
     # logging.debug('Predicted Array:')
     # print(predictedArray)
     # logging.debug('Read Array:')
-    # print(currentArray)
+    # print(np.array(currentArray))
     # if input("Does predicted match screen? [Y/n]\t").lower() == 'n':
     #     time.sleep(2)
-    #     return
+    #     return currentArray
     # time.sleep(2)
 
     height, width = predictedArray.shape
     for y in range(height):
         for x in range(width):
             if predictedArray[y][x] != currentArray[y][x]:
-                if currentArray[y][x] <= 4: continue
+                if currentArray[y][x] <= 4 and predictedArray[y][x] == 0: continue
                 colorCode = tileColorList[y][x]
                 if not IsColorInColorList(colorCode, colorList):
                     AppendColorFile(config['colors'], {
@@ -190,8 +190,9 @@ def CompareStates(
                         predictedArray[y][x],
                         colorCode
                     ))
+                currentArray[y][x] = predictedArray[y][x]
             else:
-                if currentArray[y][x] <= 4: continue
+                if currentArray[y][x] <= 4 and predictedArray[y][x] == 0: continue
                 colorCode = tileColorList[y][x]
                 if not IsColorInColorList(colorCode, colorList):
                     AppendColorFile(config['colors'], {
@@ -200,6 +201,13 @@ def CompareStates(
                         'g': colorCode[1],
                         'b': colorCode[2]
                     })
+                    colorList.append((
+                        predictedArray[y][x],
+                        colorCode
+                    ))
+    # logging.debug('Updated Array:')
+    # print(np.array(currentArray))
+    return currentArray
 
 
 def IsColorInColorList(color: np.ndarray, colorList: list) -> bool:
