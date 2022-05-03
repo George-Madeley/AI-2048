@@ -1,3 +1,4 @@
+import math
 from turtle import width
 import numpy as np
 
@@ -218,7 +219,7 @@ class GameState:
             The score.
         """
 
-        scoresArray = self.SumProductOfTwoAdjacentTiles()
+        scoresArray = self.DifferenceInLog2()
         return np.sum(scoresArray)
 
     def SumProductOfFourAdjacentTiles(self) -> np.array:
@@ -269,3 +270,65 @@ class GameState:
                 tempArray[y][x] = total
         return tempArray
     
+    def SumProductOfFourAdjacentTilesWithBounds(self) -> np.array:
+        """
+        Scans through each tile and sums the products of its value and the values of
+        neighboring tiles. If the pieces is next to the bounds, its multiplied by itself.
+        
+        Returns:
+            np.array of the resulting values.
+        """
+        
+        sizeY, sizeX = self.array.shape
+        tempArray = np.zeros((sizeY, sizeX))
+        boundY = range(sizeY)
+        boundX = range(sizeX)
+        for y in boundY:
+            for x in boundX:
+                total = 0
+                if x - 1 in boundX:
+                    total += self.array[y][x] * self.array[y][x - 1]
+                else:
+                    total += self.array[y][x] ** 2
+                if x + 1 in boundX:
+                    total += self.array[y][x] * self.array[y][x + 1]
+                else:
+                    total += self.array[y][x] ** 2
+                if y - 1 in boundY:
+                    total += self.array[y][x] * self.array[y - 1][x]
+                else:
+                    total += self.array[y][x] ** 2
+                if y + 1 in boundY:
+                    total += self.array[y][x] * self.array[y + 1][x]
+                else:
+                    total += self.array[y][x] ** 2
+                tempArray[y][x] = total
+        return tempArray
+
+    def DifferenceInLog2(self) -> np.array:
+        """
+        Scans through each tile and sums the different of neighboring tiles log2 values.
+
+        Returns:
+            np.array of the resulting value.
+        """
+
+        sizeY, sizeX = self.array.shape
+        tempArray = np.zeros((sizeY, sizeX))
+        boundY = range(sizeY)
+        boundX = range(sizeX)
+        for y in boundY:
+            for x in boundX:
+                if self.array[y][x] == 0: continue
+                total = 0
+                if x - 1 in boundX and self.array[y][x - 1] != 0:
+                    total += abs(math.log2(self.array[y][x]) - math.log2(self.array[y][x - 1]))
+                if x + 1 in boundX and self.array[y][x + 1] != 0:
+                    total += abs(math.log2(self.array[y][x]) - math.log2(self.array[y][x + 1]))
+                if y - 1 in boundY and self.array[y - 1][x] != 0:
+                    total += abs(math.log2(self.array[y][x]) - math.log2(self.array[y - 1][x]))
+                if y + 1 in boundY and self.array[y + 1][x] != 0:
+                    total += abs(math.log2(self.array[y][x]) - math.log2(self.array[y + 1][x]))
+                tempArray[y][x] = total
+        return tempArray
+

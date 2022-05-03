@@ -2,6 +2,7 @@
 This script holds the agent class and functionality for the agent to solve the puzzle.
 """
 
+import math
 from random import randint
 from state import GameState
 
@@ -40,9 +41,9 @@ class Agent:
             The best next move.
         """
         # Find best score
-        score = self.GetBestChildStateScore()
+        score = self.GetBestChildStateScore(smallest=True)
         # If best score is -1, there are no more possible moves.
-        if score == -1:
+        if score == -1 or score == math.inf:
             return -1
 
         # Find path to the best score
@@ -59,15 +60,18 @@ class Agent:
                 return move
         raise ValueError("Next move could not be found.")
         
-    def GetBestChildStateScore(self) -> int:
+    def GetBestChildStateScore(self, smallest: bool = False) -> int:
         """
-        Searches through the game state tree to find the leaf with the highest score.
+        Searches through the game state tree to find the leaf with the best score.
         
+        Args:
+            smallest: True if the impliementer wants to find the smallest value in the tree.
+
         Returns:
             The highest Score.
         """
 
-        bestScore = -1
+        bestScore = math.inf if smallest else -1
         frontier = [self.__gameState]
         while frontier:
             state = frontier.pop(0)
@@ -75,8 +79,12 @@ class Agent:
             if hasattr(state, 'children'):
                 frontier.extend(state.children)
             else:
-                if state.score >= bestScore:
-                    bestScore = state.score
+                if smallest:
+                    if state.score <= bestScore:
+                        bestScore = state.score
+                else:
+                    if state.score >= bestScore:
+                        bestScore = state.score
         return bestScore
 
     def FindPath(self, score: int, state: object) -> any:
